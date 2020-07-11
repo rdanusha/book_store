@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block body %}
+    <section class="mt-3">
+        <div class="row">
+            <div class="col-6"><h1>{{ page_title }}</h1></div>
+        </div>
+        <div class="row">
+            <div class="col-8">
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                {% if cart_items %}
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">Item</th>
+                            <th scope="col">Item Category</th>
+                            <th scope="col" class="text-right">Item Price</th>
+                            <th scope="col" class="text-right">Quantity</th>
+                            <th scope="col" class="text-right">Total</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for cart_item in cart_items %}
+                            <tr class="">
+                                <td>{{ cart_item.product.name }}</td>
+                                <td>{{ cart_item.product.productCategory }}</td>
+                                <td class="text-right">{{ cart_item.product.price|number_format(2, '.', ',') }}</td>
+                                <td class="text-right">{{ cart_item.quantity }}</td>
+                                {% set unit_price = cart_item.product.price * cart_item.quantity %}
+                                <td class="text-right">{{ unit_price|number_format(2, '.', ',') }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="">
+                            <td colspan="4" class="text-right"><b>Total</b></td>
+                            <td class="text-right">{{ cart_total |number_format(2, '.', ',') }}</td>
+                        </tr>
+                        <tr class="">
+                            <td colspan="4" class="text-right"><b>Children Books Discount</b></td>
+                            <td class="text-right">{{ children_books_discount |number_format(2, '.', ',') }}</td>
+                        </tr>
+                        <tr class="">
+                            <td colspan="4" class="text-right"><b>Additional Discount</b></td>
+                            <td class="text-right">{{ additional_discount |number_format(2, '.', ',') }}</td>
+                        </tr>
+                        {% if (coupon_code) %}
+                        <tr class="">
+                            <td colspan="4" class="text-right"><b>Coupon Discount</b></td>
+                            <td class="text-right">{{ coupon_discount |number_format(2, '.', ',') }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr class="">
+                            <td colspan="4" class="text-right"><b>Coupon Code</b></td>
+                            <td class="text-right">
+
+                                <form action="{{ url('checkout') }}" method="POST">
+                                    <input type="text" name="coupon_code" value="{{ coupon_code }}">
+                                    <button type="submit" class="btn btn-sm btn-primary">Add Coupon</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td colspan="4" class="text-right bt"><b>Net Total</b></td>
+                            <td class="text-right"><b>{{ net_total  |number_format(2, '.', ',') }}</b></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No products in cart</p>
+                {% endif %}
+            </div>
+    </section>
+{% endblock %}

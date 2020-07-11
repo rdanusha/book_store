@@ -1,0 +1,9 @@
+
+    <div class="col-12  mb-1">
+        <div class="card border-white mb-1 float-right" style="max-width: 20rem;">
+            <div class="card-body text-center">
+                <h4 class="card-title">Cart Total: Rs {{ cart_total|number_format(2, '.', ',')  }}</h4>
+                <a href="{{ url('checkout') }}" type="button" class="btn btn-danger btn-sm">Checkout</a>
+            </div>
+        </div>
+    </div>
