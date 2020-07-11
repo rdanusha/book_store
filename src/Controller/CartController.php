@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CartController extends AbstractController
 {
-    private $uer_cart_id;
+    private $user_cart_id;
     private $cart;
     private $user;
 
@@ -22,7 +22,7 @@ class CartController extends AbstractController
     {
         $this->cart = $cart;
         $this->user = 1; //TODO set logged user id
-        $this->uer_cart_id = $cart->findOneBy(['user_id' => $this->user]);
+        $this->user_cart_id = $cart->findOneBy(['user_id' => $this->user]);
     }
 
     /**
@@ -32,8 +32,8 @@ class CartController extends AbstractController
     public function index()
     {
 
-        $cart_total = $this->cart->getCartTotal($this->uer_cart_id);
-        $cart_items = $this->cart->getCartItems($this->uer_cart_id);
+        $cart_total = $this->cart->getCartTotal($this->user_cart_id);
+        $cart_items = $this->cart->getCartItems($this->user_cart_id);
 
         return $this->render('cart/index.html.twig', [
             'cart_total' => $cart_total,
@@ -105,6 +105,6 @@ class CartController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($cart_item);
         $entityManager->flush();
-        return new JsonResponse(['type'=>'success']);
+        return new JsonResponse(['type' => 'success']);
     }
 }

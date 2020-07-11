@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ShopController extends AbstractController
 {
 
-    private $uer_cart_id;
+    private $user_cart_id;
     private $cart;
     private $user;
 
@@ -20,7 +20,7 @@ class ShopController extends AbstractController
     {
         $this->cart = $cart;
         $this->user = 1; //TODO set logged user id
-        $this->uer_cart_id = $cart->findOneBy(['user_id' => $this->user]);
+        $this->user_cart_id = $cart->findOneBy(['user_id' => $this->user]);
     }
 
     /**
@@ -29,23 +29,24 @@ class ShopController extends AbstractController
      */
     public function index(ProductRepository $products): Response
     {
-        $cart_total = $this->cart->getCartTotal($this->uer_cart_id);
+        $cart_total = $this->cart->getCartTotal($this->user_cart_id);
         $products = $products->findAll();
 
         return $this->render('shop/index.html.twig', ['products' => $products, 'cart_total' => $cart_total]);
     }
 
     /**
+     * Checkout Page
      * @Route("/shop/checkout", methods="GET|POST", name="checkout")
      */
     public function checkout(Request $request): Response
     {
-        $cart_total = $this->cart->getCartTotal($this->uer_cart_id);
-        $cart_items = $this->cart->getCartItems($this->uer_cart_id);
-        $children_books_discount = $this->cart->getChildrenBooksDiscount($this->uer_cart_id, 5, 10);
+        $cart_total = $this->cart->getCartTotal($this->user_cart_id);
+        $cart_items = $this->cart->getCartItems($this->user_cart_id);
+        $children_books_discount = $this->cart->getChildrenBooksDiscount($this->user_cart_id, 5, 10);
         $additional_discount = 0;
         $coupon_discount = 0;
-        $additional_discount_eligibility = $this->cart->checkAdditionalDiscountEligibility($this->uer_cart_id, 10);
+        $additional_discount_eligibility = $this->cart->checkAdditionalDiscountEligibility($this->user_cart_id, 10);
         $coupon_code = '';
         if ($additional_discount_eligibility) {
             $additional_discount = $this->cart->getAdditionalDiscount($cart_total, 5);
@@ -54,7 +55,7 @@ class ShopController extends AbstractController
         if ($request->isMethod('POST')) {
             $coupon_code = $request->get('coupon_code');
             if ($coupon_code == 'DIS15') {
-                $this->addFlash('success', 'created_successfully');
+                $this->addFlash('success', 'Coupon code added successfully');
                 $coupon_discount = $this->cart->getAdditionalDiscount($cart_total, 15);
                 $additional_discount = 0;
                 $children_books_discount = 0;

@@ -51,13 +51,16 @@ class CartRepository extends ServiceEntityRepository
 
     public function getCartTotal($cart_id)
     {
-        $item_prices = $this->find($cart_id)->getCartItems()->map(function ($item) {
-            $product_price = $item->getProduct()->getPrice();
-            $quantity = $item->getQuantity();
-            $item_price = $product_price * $quantity;
-            return $item_price;
-        });
-        return array_sum($item_prices->toArray());
+        if(!empty($cart_id)) {
+            $item_prices = $this->find($cart_id)->getCartItems()->map(function ($item) {
+                $product_price = $item->getProduct()->getPrice();
+                $quantity = $item->getQuantity();
+                $item_price = $product_price * $quantity;
+                return $item_price;
+            });
+            return array_sum($item_prices->toArray());
+        }
+        return 0;
     }
 
     public function getCartItems($cart_id)
