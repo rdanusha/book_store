@@ -14,13 +14,11 @@ class ShopController extends AbstractController
 
     private $user_cart_id;
     private $cart;
-    private $user;
 
     public function __construct(CartRepository $cart)
     {
         $this->cart = $cart;
-        $this->user = 1; //TODO set logged user id
-        $this->user_cart_id = $cart->findOneBy(['user_id' => $this->user]);
+        $this->user_cart_id = $cart->getUserCartId();
     }
 
     /**

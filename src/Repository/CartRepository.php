@@ -19,39 +19,25 @@ class CartRepository extends ServiceEntityRepository
         parent::__construct($registry, Cart::class);
     }
 
-    // /**
-    //  * @return Cart[] Returns an array of Cart objects
-    //  */
-    /*
-    public function findByExampleField($value)
+
+    /**
+     * get user cart
+     */
+    public function getUserCartId()
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        $temp_user = 1; //TODO set logged user id
+        return $user_cart_id = $this->findOneBy(['user_id' => $temp_user]);
     }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Cart
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 
 
+    /**
+     * get cart total
+     * @param $cart_id
+     * @return float|int
+     */
     public function getCartTotal($cart_id)
     {
-        if(!empty($cart_id)) {
+        if (!empty($cart_id)) {
             $item_prices = $this->find($cart_id)->getCartItems()->map(function ($item) {
                 $product_price = $item->getProduct()->getPrice();
                 $quantity = $item->getQuantity();
@@ -63,44 +49,67 @@ class CartRepository extends ServiceEntityRepository
         return 0;
     }
 
+    /**
+     * get cart items
+     * @param $cart_id
+     * @return \App\Entity\CartItem[]|\Doctrine\Common\Collections\Collection
+     */
     public function getCartItems($cart_id)
     {
-        return $this->find($cart_id)->getCartItems();
+        if (!empty($cart_id)) {
+            return $this->find($cart_id)->getCartItems();
+        }
     }
 
+    /**
+     * calculate children books discount
+     * @param $cart_id
+     * @param $max_items
+     * @param $discount_rate
+     * @return float|int
+     */
     public function getChildrenBooksDiscount($cart_id, $max_items, $discount_rate)
     {
         $total_quantity = 0;
         $total_price = 0;
         $discount = 0;
 
+        //get children books list
         $children_books = $this->find($cart_id)->getCartItems()->filter(function ($item) {
             $product = $item->getProduct();
             if ($product->getProductCategory()->getId() == 1) {
                 return $item;
             }
-
         });
 
+        //set total qty and price
         foreach ($children_books->toArray() as $children_book) {
             $total_quantity += $children_book->getQuantity();
             $product_price = $children_book->getProduct()->getPrice();
             $total_price += $children_book->getQuantity() * $product_price;
         }
-
+        //check eligibility condition
         if ($total_quantity >= $max_items) {
             $discount = $total_price * $discount_rate / 100;
         }
+
         return $discount;
 
     }
 
+    /**
+     * check additional discount eligibility
+     * @param $cart_id
+     * @param $max_items
+     * @return bool
+     */
     public function checkAdditionalDiscountEligibility($cart_id, $max_items)
     {
         $cart_items = $this->find($cart_id)->getCartItems()->toArray();
 
         $children_books_count = 0;
         $fiction_books_count = 0;
+
         foreach ($cart_items as $item) {
             $product_category_id = $item->getProduct()->getProductCategory()->getId();
             if ($product_category_id == 1) {
@@ -117,9 +126,15 @@ class CartRepository extends ServiceEntityRepository
         return false;
     }
 
+    /**
+     * get additional discount
+     * @param $cart_total
+     * @param $discount_rate
+     * @return float|int
+     */
     public function getAdditionalDiscount($cart_total, $discount_rate)
     {
-       return  $cart_total *  $discount_rate / 100;
+        return $cart_total * $discount_rate / 100;
 
     }
 }
